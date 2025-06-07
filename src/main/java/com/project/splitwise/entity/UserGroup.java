@@ -1,10 +1,10 @@
 package com.project.splitwise.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import lombok.Data;
 
+@Entity
+@Data
 //establishes ManyToMany connection between user and group
 public class UserGroup {
     @Id

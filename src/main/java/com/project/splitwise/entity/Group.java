@@ -1,16 +1,21 @@
 package com.project.splitwise.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Data
+@Table(name = "groups") // Explicit table name
 public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Column(nullable = false,unique = true)
+    private String groupName;
     private String description;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)

@@ -1,13 +1,13 @@
 package com.project.splitwise.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
+@Entity
+@Data
 public class Settlement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

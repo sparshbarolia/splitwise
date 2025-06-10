@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Data
@@ -18,7 +19,7 @@ public class Expense {
     private String description;
     private BigDecimal amount;
     private Date date;
-    private ExpenseStatus status; // PENDING, SETTLED, etc.
+    private ExpenseStatus status; // PENDING, SETTLED,PARTIALLY_SETTLED
 
     @ManyToOne
     private User payer;

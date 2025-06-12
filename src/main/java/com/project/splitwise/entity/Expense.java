@@ -19,8 +19,13 @@ public class Expense {
     private String description;
     private BigDecimal amount;
     private Date date;
+    
+    @Enumerated(EnumType.STRING)
     private ExpenseStatus status; // PENDING, SETTLED,PARTIALLY_SETTLED
-
+    
+    @Enumerated(EnumType.STRING)
+    private SplitType splitType; // EQUAL,EXACT,PERCENTAGE
+    
     @ManyToOne
     private User payer;
 

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class TwoHeapSettleUpStrategy implements SettleUpStrategy{
+public class SettleUpStrategyImpl implements SettleUpStrategy{
 
     @Override
     public List<SettlementShareDTO> settleUpUsingHeap(){

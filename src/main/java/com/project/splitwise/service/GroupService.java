@@ -1,10 +1,12 @@
 package com.project.splitwise.service;
 
+import com.project.splitwise.dto.SettlementShareDTO;
 import com.project.splitwise.entity.Group;
 import com.project.splitwise.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -20,4 +22,5 @@ public class GroupService {
     public Optional<Group> findByGroupName(String inputGroupName){
         return groupRepository.findByGroupName(inputGroupName);
     }
+
 }

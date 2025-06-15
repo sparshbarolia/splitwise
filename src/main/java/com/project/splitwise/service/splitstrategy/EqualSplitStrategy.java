@@ -22,12 +22,28 @@ public class EqualSplitStrategy implements SplitStrategy{
         if (numberOfParticipants == 0) {
             throw new IllegalArgumentException("No participants found for equal split.");
         }
+        
+        int includedParticipantsInSplit = 0;
+        
+        for(ParticipantDto participant : participants) {
+        	
+        	if(participant.getIncludedInSplit()==true) {
+        		includedParticipantsInSplit++;
+        	}
+        	
+        }
 
         // Calculate equal share (rounded to 2 decimal places)
-        BigDecimal individualShare = totalAmount.divide(BigDecimal.valueOf(numberOfParticipants), 2, RoundingMode.HALF_UP);
+        BigDecimal individualShare = totalAmount.divide(BigDecimal.valueOf(includedParticipantsInSplit), 2, RoundingMode.HALF_UP);
 
         for (ParticipantDto participant : participants) {
+        	
+        	if(participant.getIncludedInSplit()== true) {
             owedAmounts.put(participant.getUserId(), individualShare);
+        	}
+        	else {
+        		owedAmounts.put(participant.getUserId(), BigDecimal.ZERO);
+        	}
         }
 
         return owedAmounts;

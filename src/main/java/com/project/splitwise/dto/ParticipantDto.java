@@ -13,5 +13,7 @@ public class ParticipantDto {
 	
 	private Long userId;
     private BigDecimal paidAmount;
+    private BigDecimal owedAmount;
+    private Boolean includedInSplit;
     
 }

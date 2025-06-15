@@ -42,6 +42,24 @@ public class ExpenseService {
         User user = userRepository.findById(dto.getCreatedByUserId()).orElseThrow();
         Group group = groupRepository.findById(dto.getGroupId()).orElseThrow();
         
+        //Sum of amount paid by participants should be equal to total amount of expense.
+        BigDecimal totalPaidAmount = BigDecimal.ZERO;
+        
+        for (ParticipantDto participant : dto.getParticipants()) {
+            if (participant.getPaidAmount() != null) {
+            	totalPaidAmount = totalPaidAmount.add(participant.getPaidAmount());
+            }
+        }
+       
+        //This validation is applicable for all the strategies.
+        if(totalPaidAmount.compareTo(dto.getTotalAmount())!=0) {
+            throw new IllegalArgumentException("Total paid (" + totalPaidAmount + ") does not match total amount (" + dto.getTotalAmount() + ")");
+        }
+        
+       // Use split strategy
+        SplitStrategy strategy = SplitStrategyFactory.getStrategy(dto.getSplitType());
+        Map<Long, BigDecimal> calculatedOwedAmounts = strategy.calculateShares(dto.getTotalAmount(), dto.getParticipants());
+
         //Create Expense
         Expense expense = new Expense();
         expense.setDescription(dto.getDescription());
@@ -54,10 +72,7 @@ public class ExpenseService {
         
         expense = expenseRepository.save(expense);
 
-        // Use split strategy
-        SplitStrategy strategy = SplitStrategyFactory.getStrategy(dto.getSplitType());
-        Map<Long, BigDecimal> calculatedOwedAmounts = strategy.calculateShares(dto.getTotalAmount(), dto.getParticipants());
-
+        
         //Save Participants
         for(ParticipantDto participantDto : dto.getParticipants())
         {

@@ -53,10 +53,10 @@ public class SettleUpStrategyImpl implements SettleUpStrategy{
 
             //if toReceive value is > toPay value
             if(toReceive.getUserShare().compareTo(amountToBePaid) > 0){
-                maxHeap.add(new SettlementShareDTO(toReceive.getUserName(),toPay.getUserShare().subtract(amountToBePaid)));
+                maxHeap.add(new SettlementShareDTO(toReceive.getUserName(),toReceive.getUserShare().subtract(amountToBePaid)));
             }
             else if(toPay.getUserShare().abs().compareTo(amountToBePaid) > 0){
-                minHeap.add(new SettlementShareDTO(toPay.getUserName(),toReceive.getUserShare().add(amountToBePaid)));
+                minHeap.add(new SettlementShareDTO(toPay.getUserName(),toPay.getUserShare().add(amountToBePaid)));
             }
 
             output.add(settlementTransaction);

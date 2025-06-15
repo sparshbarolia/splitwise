@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -85,8 +87,6 @@ public class GroupController {
             Optional<Group> currGroup = groupService.findByGroupName(groupName);
             if(currGroup.isEmpty())throw new NullPointerException("No such group exist with given groupName");
 
-
-
             //add user and group to the userGroup
             UserGroup currUserGroup = new UserGroup();
             currUserGroup.setGroup(currGroup.get());
@@ -117,10 +117,8 @@ public class GroupController {
 
     @GetMapping("/getBalance/{groupName}")
     public Map<String, BigDecimal> fetchBalancesOfGroup(@PathVariable String groupName){
-        return groupService.findShareOfUsers(groupName);
+        Map<String,BigDecimal> userWiseExpenseMap = new HashMap<>();
+
+        return groupService.findShareOfUsers(groupName,userWiseExpenseMap);
     }
-
-
-
-
 }

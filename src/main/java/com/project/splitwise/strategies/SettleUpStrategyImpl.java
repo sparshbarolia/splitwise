@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 
 @Component
 public class SettleUpStrategyImpl implements SettleUpStrategy{
@@ -19,7 +16,7 @@ public class SettleUpStrategyImpl implements SettleUpStrategy{
     private GroupService groupService;
 
     @Override
-    public List<SettleUpDTO> settleUpUsingHeap(String inputGroupName){
+    public List<SettleUpDTO> settleUpUsingHeap(Map<String, BigDecimal> userShareOfGroup){
 
         //define min heap and max heap
         PriorityQueue<SettlementShareDTO> maxHeap = new PriorityQueue<>(
@@ -29,8 +26,9 @@ public class SettleUpStrategyImpl implements SettleUpStrategy{
                 (a, b) -> a.getUserShare().compareTo(b.getUserShare())  // ascending order
         );
 
-        //get individual total balances of every user in group
-        Map<String, BigDecimal> userShareOfGroup = groupService.findShareOfUsers(inputGroupName);
+//        //get individual total balances of every user in group
+//        Map<String, BigDecimal> userShareOfGroup = new HashMap<>();
+//        userShareOfGroup = groupService.findShareOfUsers(inputGroupName,userShareOfGroup);
 
         //insert balances of every user in heaps
         for (Map.Entry<String, BigDecimal> entry : userShareOfGroup.entrySet()) {

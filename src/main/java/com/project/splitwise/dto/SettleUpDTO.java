@@ -10,6 +10,7 @@ public class SettleUpDTO {
     private String paidTo;
     private BigDecimal amount;
 
+
     public SettleUpDTO(String a,String b,BigDecimal c){
         this.paidFrom = a;
         this.paidTo = b;

@@ -1,10 +1,7 @@
 package com.project.splitwise.service;
 
 import com.project.splitwise.dto.SettlementShareDTO;
-import com.project.splitwise.entity.Expense;
-import com.project.splitwise.entity.ExpenseShare;
-import com.project.splitwise.entity.Group;
-import com.project.splitwise.entity.ShareStatus;
+import com.project.splitwise.entity.*;
 import com.project.splitwise.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,17 +26,18 @@ public class GroupService {
         return groupRepository.findByGroupName(inputGroupName);
     }
 
-    public Map<String, BigDecimal> findShareOfUsers(String inputGroupName){
+    public Map<String, BigDecimal> findShareOfUsers(String inputGroupName , Map<String,BigDecimal> userWiseExpenseMap){
         //find group
-//        Optional<Group> currGroup = groupRepository.findByGroupName(inputGroupName);
-
         Optional<Group> currGroup = findByGroupName(inputGroupName);
 
         if(currGroup.isEmpty())throw new IllegalArgumentException("please enter valid groupName");
 
-        Map<String,BigDecimal> userWiseExpenseMap = new HashMap<>();
+//        Map<String,BigDecimal> userWiseExpenseMap = new HashMap<>();
 
         for(Expense currExpense : currGroup.get().getExpenses()){
+
+            if(currExpense.getStatus() == ExpenseStatus.SETTLED)continue;
+
             for(ExpenseShare currExpenseShare : currExpense.getShares()){
 
                 String currUserName = currExpenseShare.getUser().getUserName();;

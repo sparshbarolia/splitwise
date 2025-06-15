@@ -2,6 +2,9 @@ package com.project.splitwise.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -10,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"shares"})
 public class Expense {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

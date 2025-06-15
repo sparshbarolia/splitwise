@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 
@@ -112,6 +113,11 @@ public class GroupController {
                             "message", e.getMessage()
                     ));
         }
+    }
+
+    @GetMapping("/getBalance/{groupName}")
+    public Map<String, BigDecimal> fetchBalancesOfGroup(@PathVariable String groupName){
+        return groupService.findShareOfUsers(groupName);
     }
 
 

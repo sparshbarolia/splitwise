@@ -1,12 +1,18 @@
 package com.project.splitwise.service;
 
 import com.project.splitwise.dto.SettlementShareDTO;
+import com.project.splitwise.entity.Expense;
+import com.project.splitwise.entity.ExpenseShare;
 import com.project.splitwise.entity.Group;
+import com.project.splitwise.entity.ShareStatus;
 import com.project.splitwise.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -22,5 +28,33 @@ public class GroupService {
     public Optional<Group> findByGroupName(String inputGroupName){
         return groupRepository.findByGroupName(inputGroupName);
     }
+
+    public Map<String, BigDecimal> findShareOfUsers(String inputGroupName){
+        //find group
+//        Optional<Group> currGroup = groupRepository.findByGroupName(inputGroupName);
+
+        Optional<Group> currGroup = findByGroupName(inputGroupName);
+
+        if(currGroup.isEmpty())throw new IllegalArgumentException("please enter valid groupName");
+
+        Map<String,BigDecimal> userWiseExpenseMap = new HashMap<>();
+
+        for(Expense currExpense : currGroup.get().getExpenses()){
+            for(ExpenseShare currExpenseShare : currExpense.getShares()){
+
+                String currUserName = currExpenseShare.getUser().getUserName();;
+                BigDecimal currBalanceAmount = currExpenseShare.getPaidAmount().subtract(currExpenseShare.getShareAmount());
+
+                if (userWiseExpenseMap.containsKey(currUserName)) {
+                    userWiseExpenseMap.put(currUserName, userWiseExpenseMap.get(currUserName).add(currBalanceAmount));
+                } else {
+                    userWiseExpenseMap.put(currUserName, currBalanceAmount);
+                }
+            }
+        }
+        return userWiseExpenseMap;
+    }
+
+
 
 }

@@ -2,6 +2,7 @@ package com.project.splitwise.controller;
 
 import com.project.splitwise.dto.CreateExpenseDto;
 import com.project.splitwise.entity.*;
+import com.project.splitwise.repository.ExpenseRepository;
 import com.project.splitwise.service.ExpenseService;
 import com.project.splitwise.service.ExpenseShareService;
 import com.project.splitwise.service.GroupService;
@@ -26,6 +27,9 @@ public class ExpenseController {
 	 
 	@Autowired
 	private ExpenseService expenseService;
+
+	@Autowired
+	private ExpenseRepository expenseRepository;
 	
 	@PostMapping
 	public ResponseEntity<String> createExpense(@RequestBody CreateExpenseDto dto) {
@@ -37,5 +41,15 @@ public class ExpenseController {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating expense: " + e.getMessage());
 	    }
     }
+
+	@GetMapping("/{userName}/{groupName}")
+	public ResponseEntity<?> createExpense(@PathVariable String userName,@PathVariable String groupName) {
+		try {
+			return new ResponseEntity<>(expenseRepository.findExpenseSharesOfUserInAGroup(userName,groupName),HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating expense: " + e.getMessage());
+		}
+	}
 	
 }

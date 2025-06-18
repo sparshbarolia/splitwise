@@ -2,12 +2,17 @@ package com.project.splitwise.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"payer", "receiver","group"})
 public class Settlement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

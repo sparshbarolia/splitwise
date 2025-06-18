@@ -34,6 +34,7 @@ public class SettlementService {
     public List<ConsolidatedSettlementDTO> getSettledUpAllGroupsOfUser(String inputUserName){
 
         //Map< friendName , ConsolidatedSettlementDTO >
+        //to map friend with the transaction in each group
         Map<String, ConsolidatedSettlementDTO> friendToTransactionMapping = new HashMap<>();
 
         //fetch all groups name of user
@@ -41,15 +42,18 @@ public class SettlementService {
 
 
         for(String groupName : groupList){
+            //first settle up all groups individually
             Map<String, BigDecimal> userWiseExpenseMap = new HashMap<>();
             userWiseExpenseMap = groupService.findShareOfUsers(groupName,userWiseExpenseMap);
 
             //settle up userWiseExpenseMap
             List<SettleUpDTO> settledTransactions = settleUpStrategy.settleUpUsingHeap(userWiseExpenseMap);
 
+            //if in these settled up transactions,operate on transactions to which user belongs
             for(SettleUpDTO s : settledTransactions){
                 //if user belongs to that transaction,include it
                 if(s.getPaidFrom().equalsIgnoreCase(inputUserName) || s.getPaidTo().equalsIgnoreCase(inputUserName)){
+                    //get friend name
                     String friend = s.getPaidFrom();
                     if(!s.getPaidTo().equalsIgnoreCase(inputUserName)) friend = s.getPaidTo();
 

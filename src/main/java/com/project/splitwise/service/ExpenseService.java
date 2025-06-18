@@ -16,6 +16,7 @@ import com.project.splitwise.service.splitstrategy.SplitStrategy;
 import com.project.splitwise.service.splitstrategy.SplitStrategyFactory;import jakarta.persistence.SharedCacheMode;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,8 +97,10 @@ public class ExpenseService {
             
             expenseShareRepository.save(participants);
         }
-        
-
     	
+    }
+
+    public List<ExpenseShare> getExpenseSharesOfAUserInAGroup(String inputUserName , String inputGroupName){
+        return expenseRepository.findExpenseSharesOfUserInAGroup(inputUserName,inputGroupName);
     }
 }

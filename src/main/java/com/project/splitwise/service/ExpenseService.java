@@ -2,12 +2,7 @@ package com.project.splitwise.service;
 
 import com.project.splitwise.dto.CreateExpenseDto;
 import com.project.splitwise.dto.ParticipantDto;
-import com.project.splitwise.entity.Expense;
-import com.project.splitwise.entity.ExpenseShare;
-import com.project.splitwise.entity.ExpenseStatus;
-import com.project.splitwise.entity.Group;
-import com.project.splitwise.entity.ShareStatus;
-import com.project.splitwise.entity.User;
+import com.project.splitwise.entity.*;
 import com.project.splitwise.repository.ExpenseRepository;
 import com.project.splitwise.repository.ExpenseShareRepository;
 import com.project.splitwise.repository.GroupRepository;
@@ -16,11 +11,14 @@ import com.project.splitwise.service.splitstrategy.SplitStrategy;
 import com.project.splitwise.service.splitstrategy.SplitStrategyFactory;import jakarta.persistence.SharedCacheMode;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ExpenseService {
@@ -30,6 +28,9 @@ public class ExpenseService {
     
 	@Autowired
     private GroupRepository groupRepository;
+
+    @Autowired
+    private GroupService groupService;
 	
     @Autowired
     private ExpenseRepository expenseRepository;
@@ -37,6 +38,13 @@ public class ExpenseService {
     @Autowired
     private ExpenseShareRepository expenseShareRepository;
 
+    @Autowired
+    private ExpenseShareService expenseShareService;
+
+    @Autowired
+    private UserGroupService userGroupService;
+
+    @Transactional
     public void saveExpense(CreateExpenseDto dto){
        
     	// Fetch user and group
@@ -62,14 +70,14 @@ public class ExpenseService {
         Map<Long, BigDecimal> calculatedOwedAmounts = strategy.calculateShares(dto.getTotalAmount(), dto.getParticipants());
 
         //Create Expense
-        Expense expense = new Expense();
-        expense.setDescription(dto.getDescription());
-        expense.setAmount(dto.getTotalAmount());
-        expense.setDate(new java.util.Date());
-        expense.setPayer(user);
-        expense.setGroup(group);
-        expense.setSplitType(dto.getSplitType());
-        expense.setStatus(ExpenseStatus.PENDING);
+        Expense expense = new Expense(dto.getDescription(),dto.getTotalAmount(),new java.util.Date(),ExpenseStatus.PENDING,dto.getSplitType(),user,group);
+//        expense.setDescription(dto.getDescription());
+//        expense.setAmount(dto.getTotalAmount());
+//        expense.setDate(new java.util.Date());
+//        expense.setPayer(user);
+//        expense.setGroup(group);
+//        expense.setSplitType(dto.getSplitType());
+//        expense.setStatus(ExpenseStatus.PENDING);
         
         expense = expenseRepository.save(expense);
 
@@ -83,9 +91,11 @@ public class ExpenseService {
         	
         	BigDecimal paid = participantDto.getPaidAmount();
             BigDecimal owed = calculatedOwedAmounts.get(participantDto.getUserId());
+            BigDecimal balance = paid.subtract(owed);
             
             participants.setPaidAmount(paid);
             participants.setShareAmount(owed);
+            participants.setBalanceLeft(balance);
             
             if (paid.compareTo(owed) >= 0) {
                 participants.setStatus(ShareStatus.PAID);
@@ -95,12 +105,18 @@ public class ExpenseService {
                 participants.setStatus(ShareStatus.PARTIALLY_PAID);
             }
             
-            expenseShareRepository.save(participants);
+            ExpenseShare savedExpenseShare = expenseShareRepository.save(participants);
+            expense.getShares().add(savedExpenseShare);
+
+            Optional<UserGroup> currUserGroup = userGroupService.findByGroupIdAndUserId(dto.getGroupId(),savedExpenseShare.getUser().getId());
+            if(currUserGroup.isEmpty())throw new RuntimeException("Error on creating expense as userGroup is not found");
+
+            currUserGroup.get().setTotalBalance(currUserGroup.get().getTotalBalance().add(balance));
+            userGroupService.saveUserGroup(currUserGroup.get());
         }
+        expenseRepository.save(expense);
     	
     }
 
-    public List<ExpenseShare> getExpenseSharesOfAUserInAGroup(String inputUserName , String inputGroupName){
-        return expenseRepository.findExpenseSharesOfUserInAGroup(inputUserName,inputGroupName);
-    }
+
 }

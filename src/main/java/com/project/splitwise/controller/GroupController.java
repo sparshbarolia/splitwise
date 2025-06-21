@@ -87,6 +87,10 @@ public class GroupController {
             Optional<Group> currGroup = groupService.findByGroupName(groupName);
             if(currGroup.isEmpty())throw new NullPointerException("No such group exist with given groupName");
 
+            //if user already exists in group,throw error
+            Optional<UserGroup> isCurrUserGroupPresent = userGroupService.findByGroupIdAndUserId(currGroup.get().getId(),currUser.get().getId());
+            if(!isCurrUserGroupPresent.isEmpty())throw new IllegalArgumentException("User already exists in group");
+
             //add user and group to the userGroup
             UserGroup currUserGroup = new UserGroup();
             currUserGroup.setGroup(currGroup.get());

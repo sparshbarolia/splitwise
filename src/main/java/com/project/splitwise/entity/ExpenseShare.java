@@ -16,6 +16,7 @@ public class ExpenseShare {
 
     private BigDecimal shareAmount;
     private BigDecimal paidAmount;
+    private BigDecimal balanceLeft;
     
     @Enumerated(EnumType.STRING)
     private ShareStatus status; // OWES, PAID, PARTIALLY_PAID

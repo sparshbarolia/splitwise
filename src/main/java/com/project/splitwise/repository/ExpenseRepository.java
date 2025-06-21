@@ -11,18 +11,4 @@ import java.util.List;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
-    @Query("""
-            select es
-            from
-            	ExpenseShare es
-            where
-            	es.user.userName = :userName and
-            	es.status != 'PAID' and
-            	es.expense.status != 'SETTLED' and
-            	es.expense.group.groupName = :groupName
-            """)
-    List<ExpenseShare> findExpenseSharesOfUserInAGroup(
-            @Param("userName") String userName,
-            @Param("groupName") String groupName
-    );
 }

@@ -18,12 +18,19 @@ public class GroupService {
     @Autowired
     private GroupRepository groupRepository;
 
+    @Autowired
+    private UserGroupService userGroupService;
+
     public Group saveGroup(Group inputGroup){
         return groupRepository.save(inputGroup);
     }
 
     public Optional<Group> findByGroupName(String inputGroupName){
         return groupRepository.findByGroupName(inputGroupName);
+    }
+
+    public Optional<Group> findByGroupId(Long groupId){
+        return groupRepository.findById(groupId);
     }
 
     public Map<String, BigDecimal> findShareOfUsers(String inputGroupName , Map<String,BigDecimal> userWiseExpenseMap){
@@ -34,22 +41,38 @@ public class GroupService {
 
 //        Map<String,BigDecimal> userWiseExpenseMap = new HashMap<>();
 
-        for(Expense currExpense : currGroup.get().getExpenses()){
+//        for(Expense currExpense : currGroup.get().getExpenses()){
+//
+//            if(currExpense.getStatus() == ExpenseStatus.SETTLED)continue;
+//
+//            for(ExpenseShare currExpenseShare : currExpense.getShares()){
+//
+//                String currUserName = currExpenseShare.getUser().getUserName();;
+////              BigDecimal currBalanceAmount = currExpenseShare.getPaidAmount().subtract(currExpenseShare.getShareAmount());
+//                BigDecimal currBalanceAmount = currExpenseShare.getBalanceLeft();
+//
+//                if (userWiseExpenseMap.containsKey(currUserName)) {
+//                    userWiseExpenseMap.put(currUserName, userWiseExpenseMap.get(currUserName).add(currBalanceAmount));
+//                } else {
+//                    userWiseExpenseMap.put(currUserName, currBalanceAmount);
+//                }
+//            }
+//        }
 
-            if(currExpense.getStatus() == ExpenseStatus.SETTLED)continue;
+        Optional<List<UserGroup>> userGroupList = userGroupService.findByGroupId(currGroup.get().getId());
+        if(userGroupList.isEmpty())throw new RuntimeException("No user exist in the given group");
 
-            for(ExpenseShare currExpenseShare : currExpense.getShares()){
+        for(UserGroup i : userGroupList.get()){
+            String currUserName = i.getUser().getUserName();
+            BigDecimal currBalanceAmount = i.getTotalBalance();
 
-                String currUserName = currExpenseShare.getUser().getUserName();;
-                BigDecimal currBalanceAmount = currExpenseShare.getPaidAmount().subtract(currExpenseShare.getShareAmount());
-
-                if (userWiseExpenseMap.containsKey(currUserName)) {
-                    userWiseExpenseMap.put(currUserName, userWiseExpenseMap.get(currUserName).add(currBalanceAmount));
-                } else {
-                    userWiseExpenseMap.put(currUserName, currBalanceAmount);
-                }
+            if (userWiseExpenseMap.containsKey(currUserName)) {
+                userWiseExpenseMap.put(currUserName, userWiseExpenseMap.get(currUserName).add(currBalanceAmount));
+            } else {
+                userWiseExpenseMap.put(currUserName, currBalanceAmount);
             }
         }
+
         return userWiseExpenseMap;
     }
 

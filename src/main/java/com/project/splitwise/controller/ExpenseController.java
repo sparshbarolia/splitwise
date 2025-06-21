@@ -32,6 +32,7 @@ public class ExpenseController {
 	private ExpenseRepository expenseRepository;
 	
 	@PostMapping
+    @Transactional
 	public ResponseEntity<String> createExpense(@RequestBody CreateExpenseDto dto) {
 		try {
 	        expenseService.saveExpense(dto);
@@ -42,14 +43,5 @@ public class ExpenseController {
 	    }
     }
 
-	@GetMapping("/{userName}/{groupName}")
-	public ResponseEntity<?> createExpense(@PathVariable String userName,@PathVariable String groupName) {
-		try {
-			return new ResponseEntity<>(expenseRepository.findExpenseSharesOfUserInAGroup(userName,groupName),HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating expense: " + e.getMessage());
-		}
-	}
 	
 }

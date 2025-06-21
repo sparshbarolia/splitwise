@@ -26,11 +26,11 @@ public class EqualSplitStrategy implements SplitStrategy{
         int includedParticipantsInSplit = 0;
         
         for(ParticipantDto participant : participants) {
-        	
+
         	if(participant.getIncludedInSplit()==true) {
         		includedParticipantsInSplit++;
         	}
-        	
+
         }
 
         // Calculate equal share (rounded to 2 decimal places)

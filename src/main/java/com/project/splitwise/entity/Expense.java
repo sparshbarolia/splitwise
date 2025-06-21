@@ -41,5 +41,14 @@ public class Expense {
     private List<ExpenseShare> shares = new ArrayList<>();
 
     // Constructors, getters, setters
+    public Expense(String a,BigDecimal b,Date c,ExpenseStatus d,SplitType e,User f,Group g){
+        this.description = a;
+        this.amount = b;
+        this.date = c;
+        this.status=d;
+        this.splitType = e;
+        this.payer = f;
+        this.group=g;
+    }
 
 }

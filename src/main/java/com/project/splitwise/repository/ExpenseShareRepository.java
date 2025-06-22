@@ -91,4 +91,32 @@ public interface ExpenseShareRepository extends JpaRepository<ExpenseShare, Long
             @Param("groupName") String groupName
     );
 
+    @Modifying
+    @Query("""
+            update
+                ExpenseShare es
+            set
+                es.status = 'PAID'
+            where
+                es.user.userName = :userName and
+                es.expense.group.groupName = :groupName
+            """)
+    int updateStatusToPaidForUserInGroup(
+            @Param("userName") String userName,
+            @Param("groupName") String groupName
+    );
+
+    @Modifying
+    @Query("""
+            update
+                ExpenseShare es
+            set
+                es.status = 'PAID'
+            where
+                es.expense.group.groupName = :groupName
+            """)
+    int updateStatusToPaidForAllUsersInGroup(
+            @Param("groupName") String groupName
+    );
+
 }

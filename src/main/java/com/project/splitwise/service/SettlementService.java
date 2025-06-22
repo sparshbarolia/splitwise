@@ -5,16 +5,18 @@ import com.project.splitwise.dto.ConsolidatedSettlementMiniDTO;
 import com.project.splitwise.dto.SettleUpDTO;
 import com.project.splitwise.dto.SettlementShareDTO;
 import com.project.splitwise.entity.Group;
+import com.project.splitwise.entity.Settlement;
+import com.project.splitwise.entity.User;
+import com.project.splitwise.entity.UserGroup;
 import com.project.splitwise.repository.SettlementRepository;
 import com.project.splitwise.strategies.SettleUpStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class SettlementService {
@@ -30,6 +32,19 @@ public class SettlementService {
 
     @Autowired
     private SettleUpStrategy settleUpStrategy;
+
+    @Autowired
+    private UserGroupService userGroupService;
+
+    @Autowired
+    private ExpenseService expenseService;
+
+    @Autowired
+    private ExpenseShareService expenseShareService;
+
+    public Settlement saveSettlement(Settlement input){
+        return settlementRepository.save(input);
+    }
 
     public List<ConsolidatedSettlementDTO> getSettledUpAllGroupsOfUser(String inputUserName){
 
@@ -104,5 +119,81 @@ public class SettlementService {
         }
 
         return output;
+    }
+
+    @Transactional
+    public boolean settleUpGroupAndRecordTransaction(SettleUpDTO inputTransactionDetails,String inputGroupName){
+        String receiver = inputTransactionDetails.getPaidTo();
+        String sender = inputTransactionDetails.getPaidFrom();
+        BigDecimal transactionAmount = inputTransactionDetails.getAmount();
+
+        //********************UPDATE USERGROUP***************
+
+        //fetch user Group of sender and receiver
+        Optional<UserGroup> currReceiverUserGroup = userGroupService.findByGroupNameAndUserName(inputGroupName,receiver);
+        if(currReceiverUserGroup.isEmpty())throw new IllegalArgumentException("Error in recording transaction!");
+
+        Optional<UserGroup> currSenderUserGroup = userGroupService.findByGroupNameAndUserName(inputGroupName,sender);
+        if(currSenderUserGroup.isEmpty())throw new IllegalArgumentException("Error in recording transaction!");
+
+        //change totalBalance of sender and receiver
+        currReceiverUserGroup.get().setTotalBalance(currReceiverUserGroup.get().getTotalBalance().subtract(transactionAmount));
+        currSenderUserGroup.get().setTotalBalance(currSenderUserGroup.get().getTotalBalance().add(transactionAmount));
+
+        if(currReceiverUserGroup.get().getTotalBalance().compareTo(BigDecimal.ONE) < 0){
+            currReceiverUserGroup.get().setTotalBalance(BigDecimal.ZERO);
+        }
+        if(currSenderUserGroup.get().getTotalBalance().compareTo(BigDecimal.ONE) < 0){
+            currSenderUserGroup.get().setTotalBalance(BigDecimal.ZERO);
+        }
+
+        //save userGroup
+        userGroupService.saveUserGroup(currReceiverUserGroup.get());
+        userGroupService.saveUserGroup(currSenderUserGroup.get());
+
+        //**************NOW RECORD TRANSACTION****************
+        Optional<User> receiverUserObj = userService.findByUserName(receiver);
+        if(receiverUserObj.isEmpty())throw new IllegalArgumentException("Error in recording transaction!");
+
+        Optional<User> senderUserObj = userService.findByUserName(sender);
+        if(senderUserObj.isEmpty())throw new IllegalArgumentException("Error in recording transaction!");
+
+        Optional<Group> currGroupObj = groupService.findByGroupName(inputGroupName);
+        if(currGroupObj.isEmpty())throw new IllegalArgumentException("Error in recording transaction!");
+
+        String description = "Payment from " + sender + " to " + receiver + " in " + inputGroupName + " group";
+        Settlement settlementObj = new Settlement(transactionAmount,new java.util.Date(),description,senderUserObj.get(),receiverUserObj.get(),currGroupObj.get());
+
+        settlementRepository.save(settlementObj);
+
+        //************UPDATE EXPENSE IF SETTLED UP****************
+
+        Map<String, BigDecimal> userWiseExpenseMap = new HashMap<>();
+        userWiseExpenseMap = groupService.findShareOfUsers(inputGroupName,userWiseExpenseMap);
+
+        boolean toUpdateExpenseStatus = true;
+        boolean toUpdateExpenseShareStatusToPaid = true;
+        for(Map.Entry<String, BigDecimal> entry : userWiseExpenseMap.entrySet()){
+            if(entry.getValue().compareTo(BigDecimal.ZERO) != 0){
+                toUpdateExpenseStatus=false;
+                break;
+            }
+        }
+
+        //if all expenses are paid,set status as settled in expense and paid in expenseShare for all expense and users
+        if(toUpdateExpenseStatus){
+            expenseService.updateExpenseStatusToSettledForGroup(inputGroupName);
+            expenseShareService.updateStatusToPaidForAllUsersInGroup(inputGroupName);
+            toUpdateExpenseShareStatusToPaid = false;
+        }
+        //if user has paid all his expenses,update expenseShare status to paid
+        if(toUpdateExpenseShareStatusToPaid && userWiseExpenseMap.get(sender).compareTo(BigDecimal.ZERO) == 0){
+            expenseShareService.updateStatusToPaidForUserInGroup(sender,inputGroupName);
+        }
+        if(!toUpdateExpenseStatus){
+            expenseService.updateExpenseStatusToPartiallySettledForGroup(inputGroupName);
+        }
+
+        return true;
     }
 }

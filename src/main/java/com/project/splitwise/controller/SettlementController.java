@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -80,23 +81,27 @@ public class SettlementController {
         }
     }
 
-//    @PostMapping("/group/{inputGroupName}")
-//    public ResponseEntity<?> settleUpGroupAndRecordTransaction(@RequestBody SettleUpDTO inputTransactionDetails){
-//        try {
-//            Map<String, BigDecimal> userShareOfGroup = new HashMap<>();
-//            userShareOfGroup = groupService.findShareOfUsers(inputGroupName , userShareOfGroup);
-//
-//            List<SettleUpDTO> output = settleUpStrategy.settleUpUsingHeap(userShareOfGroup);
-//
-//            return new ResponseEntity<>(output,HttpStatus.OK);
-//        }
-//        catch (Exception e){
-//            log.error("error in creating group",e);
-//            return ResponseEntity
-//                    .status(HttpStatus.BAD_REQUEST)
-//                    .body(Map.of(
-//                            "message", e.getMessage()
-//                    ));
-//        }
-//    }
+    @PostMapping("/group/{inputGroupName}")
+    @Transactional
+    public ResponseEntity<?> settleUpGroupAndRecordTransaction(
+            @PathVariable String inputGroupName,
+            @RequestBody SettleUpDTO inputTransactionDetails
+    ){
+        try {
+            boolean serviceOutput = settlementService.settleUpGroupAndRecordTransaction(inputTransactionDetails,inputGroupName);
+
+            String output = "Error in recording transaction";
+            if(serviceOutput) output = "Transaction added successfully!";
+
+            return new ResponseEntity<>(output,HttpStatus.OK);
+        }
+        catch (Exception e){
+            log.error("error in creating group",e);
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "message", e.getMessage()
+                    ));
+        }
+    }
 }

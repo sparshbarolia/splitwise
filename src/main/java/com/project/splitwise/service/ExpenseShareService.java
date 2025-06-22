@@ -37,4 +37,13 @@ public class ExpenseShareService {
     public int updateNegativeBalanceLeftOfPositiveUsersToZero(String inputUserName , String inputGroupName){
         return expenseShareRepository.updateNegativeBalanceLeftOfPositiveUsersToZero(inputUserName,inputGroupName);
     }
+
+    public int updateStatusToPaidForUserInGroup(String inputUserName , String inputGroupName){
+        return expenseShareRepository.updateStatusToPaidForUserInGroup(inputUserName,inputGroupName);
+    }
+
+    public int updateStatusToPaidForAllUsersInGroup(String inputGroupName){
+        return expenseShareRepository.updateStatusToPaidForAllUsersInGroup(inputGroupName);
+    }
+
 }

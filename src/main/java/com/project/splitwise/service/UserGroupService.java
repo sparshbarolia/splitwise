@@ -26,4 +26,8 @@ public class UserGroupService {
     public Optional<List<UserGroup>> findByGroupId(Long groupId){
         return userGroupRepository.findByGroup_id(groupId);
     }
+
+    public Optional<UserGroup> findByGroupNameAndUserName(String groupName,String userName){
+        return userGroupRepository.findByGroup_GroupNameAndUser_UserName(groupName,userName);
+    }
 }

@@ -32,4 +32,12 @@ public class Settlement {
     private Group group;
 
     // Constructors, getters, setters
+    public Settlement(BigDecimal a,Date b,String c,User d , User e,Group f){
+        this.amount=a;
+        this.date=b;
+        this.description=c;
+        this.payer=d;
+        this.receiver=e;
+        this.group=f;
+    }
 }

@@ -44,6 +44,14 @@ public class ExpenseService {
     @Autowired
     private UserGroupService userGroupService;
 
+    public int updateExpenseStatusToSettledForGroup(String groupName){
+        return expenseRepository.updateExpenseStatusToSettledForGroup(groupName);
+    }
+
+    public int updateExpenseStatusToPartiallySettledForGroup(String groupName){
+        return expenseRepository.updateExpenseStatusToPartiallySettledForGroup(groupName);
+    }
+
     @Transactional
     public void saveExpense(CreateExpenseDto dto){
        
@@ -71,14 +79,6 @@ public class ExpenseService {
 
         //Create Expense
         Expense expense = new Expense(dto.getDescription(),dto.getTotalAmount(),new java.util.Date(),ExpenseStatus.PENDING,dto.getSplitType(),user,group);
-//        expense.setDescription(dto.getDescription());
-//        expense.setAmount(dto.getTotalAmount());
-//        expense.setDate(new java.util.Date());
-//        expense.setPayer(user);
-//        expense.setGroup(group);
-//        expense.setSplitType(dto.getSplitType());
-//        expense.setStatus(ExpenseStatus.PENDING);
-        
         expense = expenseRepository.save(expense);
 
         

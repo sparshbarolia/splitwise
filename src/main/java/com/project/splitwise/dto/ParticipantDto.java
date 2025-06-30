@@ -13,7 +13,8 @@ public class ParticipantDto {
 	
 	private Long userId;
     private BigDecimal paidAmount;
-    private BigDecimal owedAmount;
-    private Boolean includedInSplit;
+    private BigDecimal owedAmount; //required as an input in exactSplit strategy.
+    private Boolean includedInSplit; //required as an input in equalSplit Strategy.
+    private BigDecimal percentage;  //required as an input in percentageSplit strategy.
     
 }

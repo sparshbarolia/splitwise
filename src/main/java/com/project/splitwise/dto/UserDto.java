@@ -1,5 +1,6 @@
 package com.project.splitwise.dto;
 
+import com.project.splitwise.entity.Role;
 import com.project.splitwise.entity.User;
 import com.project.splitwise.entity.UserGroup;
 import jakarta.persistence.Column;
@@ -20,6 +21,7 @@ public class UserDto {
     private String password;
     private String phoneNumber;
     private List<String> groups = new ArrayList<>();
+    private List<String> roles = new ArrayList<>();
 
     public UserDto(User inputUser){
         this.id = inputUser.getId();
@@ -29,6 +31,7 @@ public class UserDto {
         this.phoneNumber = inputUser.getPhoneNumber();
 
         for(UserGroup i : inputUser.getGroups())groups.add(i.getGroup().getGroupName());
+        for(Role i : inputUser.getRoles()) roles.add(i.getName());
 
     }
 }

@@ -60,7 +60,9 @@ public class UserController {
             }
             User savedUser = userService.saveUser(inputUser);
 
-            return new ResponseEntity<>(savedUser , HttpStatus.CREATED);
+            UserDto userDto = new UserDto(savedUser);
+
+            return new ResponseEntity<>(userDto , HttpStatus.CREATED);
         }
         catch (Exception e){
             log.error("error in creating user",e);
@@ -105,4 +107,26 @@ public class UserController {
                     ));
         }
     }
+
+    @PostMapping("/{userName}/role/{roleName}")
+    public ResponseEntity<?> addRoleToUser(@PathVariable String userName,@PathVariable String roleName){
+        try {
+            if(userName.isEmpty()){
+                throw new IllegalArgumentException("userName or Email can't be blank");
+            }
+            boolean boolVal = userService.addRoleToUser(userName,roleName);
+
+            return new ResponseEntity<>(boolVal , HttpStatus.CREATED);
+        }
+        catch (Exception e){
+            log.error("error in creating user",e);
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "message", e.getMessage()
+                    ));
+        }
+    }
+
+
 }

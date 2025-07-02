@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,8 +58,39 @@ public class SettlementController {
         }
     }
 
-    @GetMapping("/getAllSettled/user/{inputUserName}")
-    public ResponseEntity<?> getSettledUpAllGroupsOfUser(@PathVariable String inputUserName){
+    @GetMapping("/getAllSettled/user/group/{inputGroupName}")
+    public ResponseEntity<?> getSettledUpGroupsOfUser(@PathVariable String inputGroupName){
+        //get the logged in user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String inputUserName = authentication.getName();
+        try {
+
+            List<ConsolidatedSettlementDTO> serviceOutput = settlementService.getSettledUpGroupsOfUser(inputUserName,inputGroupName);
+
+            BigDecimal totalShare = BigDecimal.ZERO;
+            for(ConsolidatedSettlementDTO i : serviceOutput){
+                totalShare = totalShare.add(i.getTotalAmount());
+            }
+
+            AllGroupsSettledDTO output = new AllGroupsSettledDTO(totalShare,serviceOutput);
+
+            return new ResponseEntity<>(output,HttpStatus.OK);
+        }
+        catch (Exception e){
+            log.error("error in creating group",e);
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "message", e.getMessage()
+                    ));
+        }
+    }
+
+    @GetMapping("/getAllSettled/user")
+    public ResponseEntity<?> getSettledUpAllGroupsOfUser(){
+        //get the logged in user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String inputUserName = authentication.getName();
         try {
 
             List<ConsolidatedSettlementDTO> serviceOutput = settlementService.getSettledUpAllGroupsOfUser(inputUserName);

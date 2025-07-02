@@ -46,9 +46,6 @@ public class UserDetailsServiceImplementation implements UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
                 .collect(Collectors.toSet());
 
-        // Log the authorities for debugging
-        System.out.println("User: " + username + ", Authorities: " + authorities);
-
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUserName())
                 .password(user.getPassword())

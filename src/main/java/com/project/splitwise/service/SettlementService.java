@@ -46,6 +46,82 @@ public class SettlementService {
         return settlementRepository.save(input);
     }
 
+    public List<ConsolidatedSettlementDTO> getSettledUpGroupsOfUser(String inputUserName,String inputGroupName){
+
+        //Map< friendName , ConsolidatedSettlementDTO >
+        //to map friend with the transaction in each group
+        Map<String, ConsolidatedSettlementDTO> friendToTransactionMapping = new HashMap<>();
+
+//        //fetch all groups name of user
+//        List<String> groupList = userService.fetchGroupListForUser(inputUserName);
+
+
+//        for(String groupName : groupList){
+            //first settle up group
+            Map<String, BigDecimal> userWiseExpenseMap = new HashMap<>();
+            userWiseExpenseMap = groupService.findShareOfUsers(inputGroupName,userWiseExpenseMap);
+
+            //settle up userWiseExpenseMap
+            List<SettleUpDTO> settledTransactions = settleUpStrategy.settleUpUsingHeap(userWiseExpenseMap);
+
+            //if in these settled up transactions,operate on transactions to which user belongs
+            for(SettleUpDTO s : settledTransactions){
+                //if user belongs to that transaction,include it
+                if(s.getPaidFrom().equalsIgnoreCase(inputUserName) || s.getPaidTo().equalsIgnoreCase(inputUserName)){
+                    //get friend name
+                    String friend = s.getPaidFrom();
+                    if(!s.getPaidTo().equalsIgnoreCase(inputUserName)) friend = s.getPaidTo();
+
+                    ConsolidatedSettlementMiniDTO tempMiniDTO = new ConsolidatedSettlementMiniDTO(s,inputGroupName);
+
+                    //if entry for friend already exists
+                    if(friendToTransactionMapping.containsKey(friend)){
+                        ConsolidatedSettlementDTO tempDTO = friendToTransactionMapping.get(friend);
+
+                        if(tempMiniDTO.getPaidFrom().equalsIgnoreCase(inputUserName)){
+                            tempDTO.setTotalAmount(tempDTO.getTotalAmount().subtract(tempMiniDTO.getAmount()));
+                        }
+                        else tempDTO.setTotalAmount(tempDTO.getTotalAmount().add(tempMiniDTO.getAmount()));
+
+                        tempDTO.getIndividualGroupShare().add(tempMiniDTO);
+                    }
+                    else{
+                        ConsolidatedSettlementDTO tempDTO;
+                        if(tempMiniDTO.getPaidFrom().equalsIgnoreCase(inputUserName)){
+                            tempDTO = new ConsolidatedSettlementDTO(tempMiniDTO.getAmount().negate());
+                        }
+                        else tempDTO = new ConsolidatedSettlementDTO(tempMiniDTO.getAmount());
+
+                        tempDTO.getIndividualGroupShare().add(tempMiniDTO);
+
+                        friendToTransactionMapping.put(friend,tempDTO);
+                    }
+
+                }
+            }
+//        }
+
+        List<ConsolidatedSettlementDTO> output = new ArrayList<>();
+
+        for (Map.Entry<String, ConsolidatedSettlementDTO> entry : friendToTransactionMapping.entrySet()) {
+            ConsolidatedSettlementDTO tempDTO = entry.getValue();
+
+            if(tempDTO.getTotalAmount().compareTo(BigDecimal.ZERO) > 0){
+                tempDTO.setPaidTo(inputUserName);
+                tempDTO.setPaidFrom(entry.getKey());
+            }
+            else if(tempDTO.getTotalAmount().compareTo(BigDecimal.ZERO) < 0){
+                tempDTO.setPaidTo(entry.getKey());
+                tempDTO.setPaidFrom(inputUserName);
+            }
+
+            output.add(tempDTO);
+        }
+
+        return output;
+    }
+
+
     public List<ConsolidatedSettlementDTO> getSettledUpAllGroupsOfUser(String inputUserName){
 
         //Map< friendName , ConsolidatedSettlementDTO >

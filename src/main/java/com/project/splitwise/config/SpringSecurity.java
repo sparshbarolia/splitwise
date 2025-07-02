@@ -1,5 +1,6 @@
 package com.project.splitwise.config;
 
+import com.project.splitwise.filter.JwtFilter;
 import com.project.splitwise.service.UserDetailsServiceImplementation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -23,12 +24,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SpringSecurity {
 
-//    private final JwtFilter jwtFilter;
+    private final JwtFilter jwtFilter;
     private final UserDetailsServiceImplementation userDetailsServiceImplementation;
 
-    public SpringSecurity(/*JwtFilter jwtFilter,*/
+    public SpringSecurity(JwtFilter jwtFilter,
             UserDetailsServiceImplementation userDetailsServiceImplementation) {
-//        this.jwtFilter = jwtFilter;
+        this.jwtFilter = jwtFilter;
         this.userDetailsServiceImplementation = userDetailsServiceImplementation;
     }
 
@@ -43,13 +44,13 @@ public class SpringSecurity {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll() // Changed from permitAll to authenticated
                 )
-                .httpBasic(Customizer.withDefaults())
+//                .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authenticationProvider(authenticationProvider())
-                .csrf(csrf -> csrf.disable());
-//                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+//                .authenticationProvider(authenticationProvider())
+                .csrf(csrf -> csrf.disable())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

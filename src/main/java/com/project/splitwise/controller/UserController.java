@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -28,9 +30,13 @@ public class UserController {
     @Autowired
     private GroupService groupService;
 
-    @GetMapping("/{userName}")
-    public ResponseEntity<?> getUserByUserName(@PathVariable String userName){
+    @GetMapping()
+    public ResponseEntity<?> getUserByUserName(){
         try {
+            //get the logged in user
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userName = authentication.getName();
+
             if(userName.length() == 0){
                 throw new IllegalArgumentException("userName can't be blank");
             }
@@ -74,8 +80,11 @@ public class UserController {
         }
     }
 
-    @GetMapping("/getBalance/all/{userName}")
-    public ResponseEntity<?> fetchUsersFriendsBalancesOfAllGroups(@PathVariable String userName){
+    @GetMapping("/getBalance/all")
+    public ResponseEntity<?> fetchUsersFriendsBalancesOfAllGroups(){
+        //get the logged in user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
         try {
             Map<String,BigDecimal> userWiseExpenseMap = userService.fetchUsersFriendsBalancesOfAllGroups(userName);
 
@@ -91,8 +100,11 @@ public class UserController {
         }
     }
 
-    @GetMapping("/getBalance/all/settled/{userName}")
-    public ResponseEntity<?> fetchUsersSettledBalancesOfAllGroups(@PathVariable String userName){
+    @GetMapping("/getBalance/all/settled")
+    public ResponseEntity<?> fetchUsersSettledBalancesOfAllGroups(){
+        //get the logged in user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
         try {
             List<SettleUpDTO> allSettledUpTransactions = userService.fetchUsersSettledBalancesOfAllGroups(userName);
 

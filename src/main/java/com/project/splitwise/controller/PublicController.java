@@ -1,5 +1,6 @@
 package com.project.splitwise.controller;
 
+import com.project.splitwise.dto.UserDto;
 import com.project.splitwise.entity.User;
 import com.project.splitwise.service.UserDetailsServiceImplementation;
 import com.project.splitwise.service.UserService;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @Slf4j
@@ -32,6 +35,28 @@ public class PublicController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> saveUser(@RequestBody User inputUser){
+        try {
+            if(inputUser.getUserName().length() == 0 || inputUser.getEmail().length() == 0){
+                throw new IllegalArgumentException("userName or Email can't be blank");
+            }
+            User savedUser = userService.saveUser(inputUser);
+
+            UserDto userDto = new UserDto(savedUser);
+
+            return new ResponseEntity<>(userDto , HttpStatus.CREATED);
+        }
+        catch (Exception e){
+            log.error("error in creating user",e);
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "message", e.getMessage()
+                    ));
+        }
+    }
 
     //jwt token generate krdega if userName and pass sahi hue to
     @PostMapping("/login")  //user creation public rehna chahiye

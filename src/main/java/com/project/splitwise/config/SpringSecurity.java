@@ -37,12 +37,12 @@ public class SpringSecurity {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/expense/**","/settle/**")
-                                .hasAnyRole("USER", "ADMIN") // Updated to allow both roles
+                        .requestMatchers("/public/**").permitAll()
+//                        .requestMatchers("/expense/**","/settle/**")
+//                                .hasAnyRole("USER", "ADMIN") // Updated to allow both roles
 //                                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().permitAll() // Changed from permitAll to authenticated
+//                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated() // Changed from permitAll to authenticated
                 )
 //                .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session

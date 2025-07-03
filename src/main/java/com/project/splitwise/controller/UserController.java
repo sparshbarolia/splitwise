@@ -58,28 +58,6 @@ public class UserController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<?> saveUser(@RequestBody User inputUser){
-        try {
-            if(inputUser.getUserName().length() == 0 || inputUser.getEmail().length() == 0){
-                throw new IllegalArgumentException("userName or Email can't be blank");
-            }
-            User savedUser = userService.saveUser(inputUser);
-
-            UserDto userDto = new UserDto(savedUser);
-
-            return new ResponseEntity<>(userDto , HttpStatus.CREATED);
-        }
-        catch (Exception e){
-            log.error("error in creating user",e);
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of(
-                            "message", e.getMessage()
-                    ));
-        }
-    }
-
     @GetMapping("/getBalance/all")
     public ResponseEntity<?> fetchUsersFriendsBalancesOfAllGroups(){
         //get the logged in user

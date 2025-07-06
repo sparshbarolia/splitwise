@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +37,11 @@ public class ExpenseController {
     @Transactional
 	public ResponseEntity<String> createExpense(@RequestBody CreateExpenseDto dto) {
 		try {
-	        expenseService.saveExpense(dto);
+			//get the logged in user
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			String createdByUserName = authentication.getName();
+
+	        expenseService.saveExpense(dto,createdByUserName);
 	        return ResponseEntity.ok("Expense created successfully");
 	    } catch (Exception e) {
 	        e.printStackTrace(); 

@@ -216,10 +216,11 @@ public class SettlementService {
         currReceiverUserGroup.get().setTotalBalance(currReceiverUserGroup.get().getTotalBalance().subtract(transactionAmount));
         currSenderUserGroup.get().setTotalBalance(currSenderUserGroup.get().getTotalBalance().add(transactionAmount));
 
-        if(currReceiverUserGroup.get().getTotalBalance().compareTo(BigDecimal.ONE) < 0){
+        //if balance is < 1 and > -1
+        if(currReceiverUserGroup.get().getTotalBalance().abs().compareTo(BigDecimal.ONE) < 0){
             currReceiverUserGroup.get().setTotalBalance(BigDecimal.ZERO);
         }
-        if(currSenderUserGroup.get().getTotalBalance().compareTo(BigDecimal.ONE) < 0){
+        if(currSenderUserGroup.get().getTotalBalance().abs().compareTo(BigDecimal.ONE) < 0){
             currSenderUserGroup.get().setTotalBalance(BigDecimal.ZERO);
         }
 

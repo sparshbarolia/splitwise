@@ -53,10 +53,10 @@ public class ExpenseService {
     }
 
     @Transactional
-    public void saveExpense(CreateExpenseDto dto){
+    public void saveExpense(CreateExpenseDto dto,String createdByUserName){
        
     	// Fetch user and group
-        User user = userRepository.findById(dto.getCreatedByUserId()).orElseThrow();
+        User user = userRepository.findByUserName(createdByUserName).orElseThrow(()-> new RuntimeException("created by user not found"));
         Group group = groupRepository.findById(dto.getGroupId()).orElseThrow();
         
         //Sum of amount paid by participants should be equal to total amount of expense.
